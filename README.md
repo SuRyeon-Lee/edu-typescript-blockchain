@@ -87,7 +87,9 @@ b.push(2)
 
 </br></br>
 
-## 🍣 Types of TS part One
+## 🍱 Types of TS
+
+### 🍣 basic 타입
 * 지금까지 등장한 기본적인 타입들의 사용법은 아래와 같다.
 ```js
 
@@ -108,6 +110,9 @@ let e : string[] = ['i1','2'];
 let f : boolean[] = [true,false];
 
 ```
+</br>
+
+### 🍣 객체의 타입
 * 객체의 타입은 기본적으로 `let name: {key: type;} = {key: value;}`식으로 적을 수 있다.
 * 객체 내부에 키가 있을 수도 없을 수도, 있다면 어떤 타입으로 존재할 건지 정하려면 `key?: type`를 적으면 된다.
 ```js
@@ -126,6 +131,9 @@ player.age = 3;
 player.age = "3";  //타스의 보호를 받음 ➡️ 에러가 난다.😇
 
 ```
+</br>
+
+### 🍣 Alias 타입
 * 같은 모양과 타입의 객체를 여러개 만들때, 위와 같은 방식은 코드 중복이 많이 일어난다. 이때는 따로 객체 전체를 타입으로 지정하여 쓰는 방법도 있다. 
 * 이런 방법이 바로 **Alias 타입**이라고 한다.
 ```js
@@ -149,7 +157,11 @@ let lynn: Player = {
   age: 3
 };
 ```
+</br>
+
+### 🍣 함수 타입
 * 함수가 리턴하는 값의 타입을 정해줘서 안정적인 함수를 만들 수도 있다.
+* 물론 함수의 인자가 받을 타입도 지정할 수 있다.
 ```js
 //💩 before
 function playerMaker(name:string){
@@ -184,4 +196,59 @@ type Player = {
 const playerMaker = (name:string) : Player => ({name})
 const nico = playerMaker("nico")
 nico.age = 12
+```
+</br>
+
+### 🍣 readonly 속성이 포함된 타입
+* `readonly`속성을 줘서 요소들을 **읽기 전용**으로 만들 수 있다.
+```js
+type Player = {
+  readonly name: string; //📙 읽기 전용 옵션 추가
+  age?: number; 
+};
+const playerMaker = (name:string) : Player => ({name})
+const nico = playerMaker("nico")
+nico.age = 12
+nico.name = "las" //readonly인데 name을 바꾸려니까 ➡️ 에러내서 알려줌😇
+```
+* 이 readonly 가능은 배열이나 string에서도 아주 유용하다.
+```js
+const numbers: readonly number[] = [1,2,3,4]
+numbers.push(1) //readonly인데 추가하려하니까 ➡️ 에러내서 알려줌😇
+
+const names : readonly string[] = ["nico","lynn"]
+names.push('las') //readonly인데 추가하려하니까 ➡️ 에러내서 알려줌😇
+names.filter(name => name === "nico" ? true : false) //📌filter나 map 등 은 immutable이므로 readonly에 위배되지 않아서 오류를 내지 않는다.
+```
+</br>
+
+### 🍣 Tuple
+* tuple은 최소 length가 몇이고, 특정 위치에 특정 타입이 있어야 하는 배열 조건을 걸 수 있다.
+```js
+const player: [string, number, boolean] = ['nico', 12, false] 
+//최소 3개의 요소를 가져야한다.
+//요소의 순서는 차례대로 string,number,boolean이어야 한다.
+player[0] = 1 //string자리에 number추가 ➡️ 에러내서 알려줌😇
+```
+* tuple에서도 `readonly`옵션을 결합할 수 있다.
+```js
+const player: readonly [string, number, boolean] = ['nico', 12, false]
+player[0] = 'hi'
+```
+</br>
+
+### 🍣 undefined, null 그리고 any
+```js
+let a : undefined = undefined //undefined의 타입은 undefined이다.
+let b : null = null //null의 타입은 null이다.
+```
+* any 타입은 TypeScript로 부터 탈출하는 탈출구이다.
+* 가끔씩은 any를 써야할 때도 있다 but!! any를 쓸거면 뭐하러 타스를 쓰냐 싶어 권장하지 않는다.👎🏻
+```js
+let c : any //할당되지 않은 변수는 any라는 타입이 된다. === let c
+let d = [] //아무 타입도 정하지 않은 배열은 any[] 타입이된다.
+
+const e : any[] = [1,2,3,4]
+const f : any = true
+e + f //이게 가능해진다. 그냥 js처럼
 ```
