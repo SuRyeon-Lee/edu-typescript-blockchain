@@ -84,3 +84,104 @@ let b : number[] = [] //number arr라고 미리 선언한다.
 b.push("1") //타스의 보호를 받음 ➡️ 에러가 난다.😇
 b.push(2) 
 ```
+
+</br></br>
+
+## 🍣 Types of TS part One
+* 지금까지 등장한 기본적인 타입들의 사용법은 아래와 같다.
+```js
+
+//Implicit Types 👑
+let a = 1;
+let b = 'i1';
+let c = true;
+let d = [1,2];
+let e = ['i1','2'];
+let f = [true,false];
+
+//Explicit Types (필요한 경우가 아니라면 Implicit Types 추천)
+let a : number = 1;
+let b : string = 'i1';
+let c : boolean = true;
+let d : number[] = [1,2];
+let e : string[] = ['i1','2'];
+let f : boolean[] = [true,false];
+
+```
+* 객체의 타입은 기본적으로 `let name: {key: type;} = {key: value;}`식으로 적을 수 있다.
+* 객체 내부에 키가 있을 수도 없을 수도, 있다면 어떤 타입으로 존재할 건지 정하려면 `key?: type`를 적으면 된다.
+```js
+let player: {
+  name: string;
+  age?: number; //❓ = player은 age를 가질 수도, 아닐 수도 있다.
+} = {
+  name: "nico" //❓를 써줘서 age를 지정하지 않아도 에러가 나지 않는다.
+};
+
+// ⛔️ if(player.age < 10){ //❓를 써줬기 때문에, undefined가 나오면 제대로 비교를 할 수 없다. ➡️ 에러가 난다.😇
+if(player.age && player.age < 10){ // 먼저 체크부터 해준다는 조건을 넣으면 통과 so sweet...🍬 다정해..
+}
+
+player.age = 3;
+player.age = "3";  //타스의 보호를 받음 ➡️ 에러가 난다.😇
+
+```
+* 같은 모양과 타입의 객체를 여러개 만들때, 위와 같은 방식은 코드 중복이 많이 일어난다. 이때는 따로 객체 전체를 타입으로 지정하여 쓰는 방법도 있다. 
+* 이런 방법이 바로 **Alias 타입**이라고 한다.
+```js
+// 🧹 Alias 타입으로 객체 형태 자체를 타입으로 지정하기
+type Age = number;
+type Name = string;
+type Player = { //uppercase 로 type을 지정하는게 관례
+  name: string; //1️⃣name: Name 가능
+  age?: number; //2️⃣age?: Age 가능
+  /*
+  위에서 Age와 Namge의 타입을 따로 Alias 타입으로 정해줬기 때문에
+  1️⃣이나2️⃣와 같은 표현도 가능하다.
+  */
+};
+
+let nico: Player = {
+  name: "nico"
+};
+let lynn: Player = {
+  name: "lynn",
+  age: 3
+};
+```
+* 함수가 리턴하는 값의 타입을 정해줘서 안정적인 함수를 만들 수도 있다.
+```js
+//💩 before
+function playerMaker(name:string){
+    return {
+        name
+    }
+}
+
+const nico = playerMaker("nico")
+nico.age = 12 //age라는 프로퍼티를 return 값에 정의해 놓지 않아서 오류남
+
+//✨ after
+type Player = {
+  name: string;
+  age?: number; 
+};
+function playerMaker(name:string) : Player{ //🔥return 할 객체가 Player 타입을 갖게 될 것이라고 알려주기
+    return {
+        name
+    }
+}
+
+const nico = playerMaker("nico")
+nico.age = 12 //age라는 프로퍼티를 return 값에 정의해 놓지 않아서 오류남
+
+
+//📌 arrow function ver.
+type Player = {
+  name: string;
+  age?: number; 
+};
+const playerMaker = (name:string) : Player => ({name})
+const nico = playerMaker("nico")
+nico.age = 12
+```
