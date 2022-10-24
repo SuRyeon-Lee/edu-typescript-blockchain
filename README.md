@@ -409,3 +409,69 @@ const add:Add = (a, b, c?:number) => { //optional한 것에 맞게 넣어준다.
 add(1,2)
 add(1,2,3)
 ```
+</br>
+
+### 🛞 Polymorphism
+* Polymorphism은 '다형성'(many diffrent structures)을 뜻한다. (poly = many,several,much, morphos = form,structure)
+* overloading파트를 통해 2-3개의 parameter를 가질 수 있음을 확인했다.
+* 이런식으로 call signature에 추가할 타입들이 길어질 때, 더 나은 방식이 Polymorphism이다.(물론 call signature을 활용하는 방법도 작동은 하지만, Polymorphism이 더 깔끔)
+* 함수를 사용할 떄는 concrete type의 값을 넣어주겠지만, 함수의 call signature를 작성할 때 concrete type을 알 수 없을 때도 있다. 이때 Polymorphism을 사용한다고 봐도 된다.
+* **concrete type** 이란 number, boolean, string, void, unknown 등 위에서 이제 까지 나온 타입을 말한다.
+* **generic type**의 generic은 placeholder를 의미한다.concrete type을 사용하는 대신에 쓸 수 있다. placeholder를 작성하고, 그게 뭔지 추론해서 함수를 사용한다.
+```js
+//💩before
+type SuperPrint = { //Call Signature작성
+  (arr: number[]):void
+  (arr: boolean[]):void
+  (arr: string[]):void
+  // (arr: (number|boolean)[]): void
+}
+
+const superPrint: SuperPrint = (arr) => {
+  arr.forEach(i => console.log(i))
+}
+
+superPrint([1,2,3,4])
+superPrint([true,false,true,true])
+superPrint(["a","b","c"]) 
+superPrint([1,2,true,false]) //⛔️이부분에서 오류 발생!(call signature 작성되어 있지 않다. 🤦맨날 이렇게 추가해주면 아주 피곤하다.)
+
+//✨after
+type SuperPrint = {
+  <TypePlaceholder>(arr: TypePlaceholder[]):void
+  /*
+  이 Call Sginature가 generic type을 받는 다는 것을 알려준다.
+  이때 TypePlaceholder는 generic type의 이름으로,
+  어떤 것이든 무관하나,⭐️<T>나 <V>를 많이 쓴다.⭐️
+
+  많은 call signature type정의들이 
+  generic type사용으로 한방에 정리되었다!!🧹
+  */
+}
+
+const superPrint: SuperPrint = (arr) => {
+  arr.forEach(i => console.log(i))
+}
+
+superPrint([1,2,3,4])
+superPrint([true,false,true,true])
+superPrint(["a","b","c"]) 
+superPrint([1,2,true,false])
+
+//🚀feature upgrade
+type SuperPrint = {
+  <T>(arr: T[]): T
+  //이번엔 T(generic)배열을 받아서 그중 하나를 리턴한다고 알려주기
+}
+
+const superPrint: SuperPrint = (arr) => arr[0]
+
+const a = superPrint([1,2,3,4]) //number
+const b = superPrint([true,false,true,true]) //boolean
+const c = superPrint(["a","b","c"]) //string
+const d = superPrint([1,2,true,false,"hello"]) //string|number|boolean
+```
+* generic type으로 call signature를 작성하면, 함수를 사용할때 그 사용에 일치하는 타입으로 call signature를 추론해 대체해서 보여준다.
+![Polymorphism](./polymorphism01.png)
+![Polymorphism](./polymorphism02.png)
+* 이 방식말고도 다른 방식으로 generic을 사용하는 방식이 존재하고, 실재로 react에선 그걸 더 많이 쓴다.
