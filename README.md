@@ -471,7 +471,14 @@ const b = superPrint([true,false,true,true]) //boolean
 const c = superPrint(["a","b","c"]) //string
 const d = superPrint([1,2,true,false,"hello"]) //string|number|boolean
 ```
+* `any[]`를 사용하는것과 뭐가다르냐 싶을 수도 있지만, `any[]`를 사용하면 더이상 타입이 지켜주지 않는다. 예를 들어 바로 위 코드에서 a,b,c,d의 타입이 모두 `any`가 된다. 그럼 실질적으로 그 변수들을 활용해서 `d.toUpperCase()`등의 오류를 뿌려줘야 할 때에도 오류를 내지 않는다. d는`number`인데!
 * generic type으로 call signature를 작성하면, 함수를 사용할때 그 사용에 일치하는 타입으로 call signature를 추론해 대체해서 보여준다.
 ![Polymorphism](./polymorphism01.png)
 ![Polymorphism](./polymorphism02.png)
 * 이 방식말고도 다른 방식으로 generic을 사용하는 방식이 존재하고, 실재로 react에선 그걸 더 많이 쓴다.
+* generci type도 여러개의 call signature를 사용할 수 있다.
+```js
+type SuperPrint = {<T, M>(arr: T[], b: M): T}
+const superPrint: SuperPrint = (arr) => arr[0]
+const a = superPrint([1,2,3,4],"")
+```
