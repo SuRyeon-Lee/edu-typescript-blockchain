@@ -329,6 +329,83 @@ function hello(name:string|number){ //hello라는 함수가 인자로 string 혹
 * 함수를 구현하기 전에 인자와 리턴의 타입부터 정하는 방법은 깔끔하다. 첫번째로 타입을 생각하도록 해주고, 그 다음 구체적으로 코드를 적으면, 타입이 실제 코드랑 분리되서 가독성도 좋다.
 ```js
 type Add = (a:number,b:number) => number; //📌call signatures
+// type Add = {
+//     (a:number,b:number) : number;
+// } //이렇게 정의할 수도 있음.
 const add:Add = (a,b) => a + b;
 //더이상 인자와 return 값의 타입을 적어주지 않아도 된다.
+```
+</br>
+
+### 🛞 Overloading
+* 외부 패키지나 라이브러리를 사용할 때, 그 친구들이 오버로딩을 엄청 많이 씀. 때문에 우리가 오버로딩을 직접 작성하지 않아도 알아두는 것이 중요하다.
+* 오버로딩은 **함수가 서로다른 여러개의 call signatures를 가지고 있을 때** 발생된다.
+* 다시말해 오버로딩은 **여러개의 call signatures를 갖고있는 함수**이다.
+```js
+type Add = {
+    //Add라는 타입은 1️⃣로도, 2️⃣로도 구현될 수 있다. 
+    (a:number,b:number) : number //1️⃣
+    (a:number,b:string) : number //2️⃣
+}
+const add: Add = (a,b) => { //a는 number타입, b는 number나 string타입이다.
+    //그냥 a+b를 리턴하게 작성하면 b가 string일 경우 num + string에의한 타입스트립트 오류가 발생한다.
+    if(typeof b === "string") return a //string일땐 따로 처리해준다.
+    else return a+b
+}
+```
+* 위는 실재로 별로 작성할 일 없는 코드고, 아래에서 우리가 패키지나 라이브러리를 쓸 때 마주칠 수 있는 overload의 예시를 볼 수 있다.
+```js
+//Next.js의 코드 예시
+//객체로도, string으로도 인자를 넘겨줄 수 있다.
+Router.push({
+  path: "/home",
+  state: 1
+})
+
+Router.push("/home")
+
+//위가 가능한건 아래와 같이 오버로드로 정의했기 때문이다.
+
+type Config = {
+  path: string,
+  state: object
+}
+
+type Push = {
+  (path:string) : void //아무것도 리턴하지 않으므로 void
+  (config: Config) : void
+}
+
+const push : Push = (config) => {
+  if(typeof config === "string") console.log(config)
+  else {
+      console.log(config.path, config.state)
+    }
+}
+```
+* signature도 다르고, arguments의 number도 다른 경우가 있을 수 있다.
+```js
+//💩before
+type Add = {
+  (a:number, b:number) : number
+  (a:number, b:number, c:number) : number
+}
+
+const add:Add = (a, b, c) => { //c인자는 optional한데 그냥 넣어주고 있어서 불평한다.
+  return a + b
+}
+
+//✨after
+type Add = {
+  (a:number, b:number) : number
+  (a:number, b:number, c:number) : number
+}
+
+const add:Add = (a, b, c?:number) => { //optional한 것에 맞게 넣어준다. optional하고 들어갈거면 number일거야!!
+  if(c) return a + b + c
+  return a + b
+}
+
+add(1,2)
+add(1,2,3)
 ```
