@@ -1270,7 +1270,8 @@ class LocalStorage<T> { //1️⃣ Generic을 클래스로 보내고
 
 const stringStorage = new LocalStorage<string>()
 stringStorage.get("ket")
-stringStorage.set("hello",)
+stringStorage.set("hello","how are you")
 const booleanStorage = new LocalStorage<boolean>()
 booleanStorage.get("xxx")
+booleanStorage.set("xxx",true)
 ```
