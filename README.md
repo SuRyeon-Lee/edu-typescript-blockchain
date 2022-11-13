@@ -878,3 +878,368 @@ dict.add(kimchi);
 dict.def("kimchi") //한국의 음식 출력
 
 ```
+
+- 위 코드 정리 + 자잘한 포인트 추가
+
+```js
+type Words = {
+  [key:string]: string
+}
+
+class Dict {
+  private words :Words
+  constructor(){
+    this.words = {}
+  }
+  add(word:Word){
+    if(this.words[word.term] === undefined){
+      this.words[word.term] = word.def;
+    }
+  }
+  def(term:string){
+    return this.words[term]
+  }
+  static hello(){ //📌static은 JS에도 있는 개념이므로 컴파일링 후에도 붙어있다.
+    return "hello"
+  }
+}
+
+class Word {
+  constructor(
+    public readonly term:string,
+    public readonly def:string,
+  ){}
+  /*
+  여기서 term과 def는 이후 Dict클래스 내부에서 조회되야 하기 때문에
+  public으로 선언되었다.
+  그래서 readonly가 없다면
+  kimchi.def = 'xxx' 으로 변경하는 것이 가능하다.
+  */
+
+}
+
+const kimchi = new Word("kimchi", "한국의 음식");
+const dict = new Dict();
+dict.add(kimchi);
+dict.def("kimchi")
+kimchi.def = "xxx" //⛔️컴플레인: word에서 readonly로 def property를 지정해 주었기 떄문에 변경이 불가능하다.
+Dict.hello()
+
+```
+
+</br>
+
+### 🥨 Interfaces
+
+- 타입은 아래와 같이 자유롭게 만들어서 사용할 수 있다.
+
+```js
+type Nickname = string;
+type Health = number;
+type Friends = Array<string>;
+
+type Player = {
+  nickname: Nickname,
+  healthBar: Health,
+  friends: Friends,
+};
+
+const nico: Player = {
+  nickname: 'nico',
+  healthBar: 10,
+  friends: ['las'],
+};
+
+type Food = string;
+const kimchi: Food = 'delicious';
+```
+
+- 타입을 지정된 옵션으로만 제한할 수도 있다.[링크](https://www.typescriptlang.org/play?#code/PTAuE8AcFMAIBVoEMC2sC8sDOoBOBLAOwHNZAXccB92wFy7ZAW0cBLW2QAGWzAQzssBHm2QDIbAaMdkAYQ7EAR44AHJwDOdAGgBQIQCKjgDPbAAmOxAmDVlYgVjHAGoOARcdijAqBOAXVcA-EzR2xAiJOxAGqvdxsQDUDgSrHABquCRgE6aAdIApyaQgYBGQ0TAByXGgAE3DYAB9YcIAjABsAV2g4xPDwaFTUgHsAd3CAbkCoOAAJZFTQAAsMWABGBNgAVnaWgAYKyuCABVSkPNxmgG9pWFhCfABjAGtCVGgALmw8ImIZGdBQjcRUXdgGusaN2qR6hpkAX375wsIcWYXC2A3h0ehxzCmZnMlisUOtYAAiIGFcEnfaoNbgqLRGHTU7nBprDrSO5AA)
+
+```js
+//type Team = string 이라면 어떤 팀이름이라도 나올 수 있지만,
+//아래와 같이 옵션을 지정해주면 옵션 중 하나만 사용할 수 있다.✨
+type Team = 'red' | 'blue' | 'yellow';
+type Health = 1 | 5 | 10;
+
+type Player = {
+  nickname: string,
+  team: Team,
+  health: Health,
+};
+
+const nico: Player = {
+  nickname: 'nico',
+  team: 'red', //green 쓰면 오류남
+  health: 5, //8쓰면 오류남
+};
+```
+
+- 위 방법들 외에도 오브젝트의 모양을 설명하는 다른 방법엔 인터페이스가 있다.
+- 약간의 차이점은 있지만 거의 비슷하다.[링크](https://www.typescriptlang.org/play?#code/C4TwDgpgBAKhCGBbKBeKByAThAJuqAPhgEYA2ArhPkeiBKaQPYDu6A3AFCiRQASCpYAAtUUAIyEoAVkliADJw4BLAHbAImAGbwAxtAAKpeHUxQA3hyhQVSnQGsVSCAC4oAZ2CZVAcwA0lqHUkVzgkfyshAWFXfnhBIX8AX0UdRhUPa1tGV0NjDVELKxt7R0QXDGLGdHDAhERXLFxqqAB6Fu9sCBUoQAeRwBcuqEASMcANTsAKhoDIuOjpX1aWgA5+obGOZKA)
+- 타입이 다양한 형태를 지정할 수 있는 것에 반해, interface는 **오브젝트의 형태를 지정하는 데**에만 쓰일 수 있다. react.js로 작업할 떄 많이 사용한다.
+
+```js
+type Team = 'red' | 'blue' | 'yellow';
+type Health = 1 | 5 | 10;
+
+interface Hello = string //이건 불가능
+
+interface Player { //interface는 오직 오브젝트 형태 정의할 때만 쓸 수 있다.
+  //type Player = {} 이 형식만 달라짐
+  nickname: string;
+  team: Team;
+  health: Health;
+}
+
+const nico: Player = {
+  nickname: 'nico',
+  team: 'red', //green 쓰면 오류남
+  health: 5, //8쓰면 오류남
+};
+```
+
+- 오브젝트를 정의할 때, 인터페이스는 class와 문법이 비슷하여 익숙한 면도 있다. nico는 interface사용 방식을 선호
+
+```js
+interface User {
+  readonly name: string;
+}
+interface Player extends User {}
+//interface는 type이지만 extends를 사용해서 마치 클래스와 같응 문법으로 상속받을 수 있다.
+const nick: Player = {
+  name: 'nico',
+};
+
+//만약 위 작업을 type으로 하면 아래와 같아진다.
+type User = {
+  name: string,
+};
+type Player = User & {};
+const nico: Player = {
+  name: 'nico',
+};
+```
+
+- 같은 interface를 여러번 선언하면 타입스크립트가 알아서 합쳐준다. 이건 type으로 할 수 없다. 같은 이름으로 만들어진 interface는 축적할 수 있다.
+
+```js
+interface User {
+  name: string;
+}
+interface User {
+  lastName: string;
+}
+interface User {
+  health: number;
+}
+
+const nico: User = {
+  name: 'nico',
+  lastName: 'n',
+  health: 10,
+};
+```
+
+- JS에선 abstract class 라는 개념이 존재하지 않기 때문에 결구 컴파일링 시 그냥 class로 변하는 것을 확인할 수 있다. 그럼 왜 추상 클래스를 사용하는 걸까?? -> 바로 **표준화된 property와 메소드를 갖도록 해주는 청사진을 만들기 위해** 추상클래스를 사용한다.
+
+```js
+
+//1️⃣ abstract class사용시
+abstract class User{ //추상클래스는 바로 인스턴스를 만드는 것을 허용하지 않는다.
+  constructor(
+    protected firstName:string,
+    protected lastName:string,
+  ){}
+  abstract sayHi(name:string):string
+  abstract fullName():string
+}
+class Player extends User{ //abstract class 상속
+  //abstract method 구현해야함
+  fullName(){
+    return `${this.firstName} ${this.lastName}`
+  }
+  sayHi(name:string){
+    return `Hello ${name}. My hame is ${this.fullName()}`
+  }
+}
+//위 코드를 js로 컴파일 하면...
+"use strict";
+class User { //이처럼 abstract class 부분이 일반 class로 남아있다.
+    constructor(firstName, lastName) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
+}
+class Player extends User {
+    fullName() {
+        return `${this.firstName} ${this.lastName}`;
+    }
+    sayHi(name:string) {
+        return `Hello ${name}. My hame is ${this.fullName()}`;
+    }
+}
+
+```
+
+- abstract class 가 컴파일링해도 class로 남는 것과 달리 interface는 컴파일링하면 사라진다.
+- interface가 가벼운데 어떻게 특정형태를 따르도록 강제할것인가는 아래를 참고한다.
+
+```js
+//2️⃣ interface사용시
+interface User{
+  firstName: string,
+  lastName: string,
+  sayHi(name:string):string
+  fullName():string
+}
+class Player implements User{}//⛔️컴플레인: firstName,lastName,sayHi,fullName을 제대로 상속하지 않았다고 컴플레인한다.
+//이로서 인터페이스 + implements를 사용해서 abstract class를 대체할 수 있게 되었다.
+
+class Player implements User{
+  constructor(
+    /*
+    🛑interface를 이용하여 class를 만들 때는 private, protected가 될 수 없다. 반드시 public이여야만 한다.
+    */
+    public firstName : string,
+    public lastName: string
+  ){}
+  fullName() {
+    return `${this.firstName} ${this.lastName}`;
+    }
+  sayHi(name:string) {
+    return `Hello ${name}. My hame is ${this.fullName()}`;
+  }
+}
+
+/*
+extends는 js에도 있지만,
+implement는 ts의 interface에만 있는 개념이다.
+
+따라서 interface와 implements를 사용하면
+아래와 같이 js로 컴파일링시 아래와 같이
+interface로 선언했던 원본 클래스인 User라는 class가 남지 않아
+더 가벼운 코드가 된다.
+*/
+"use strict";
+class Player {
+    constructor(firstName, lastName) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
+    fullName() {
+        return `${this.firstName} ${this.lastName}`;
+    }
+    sayHi(name) {
+        return `Hello ${name}. My hame is ${this.fullName()}`;
+    }
+}
+
+```
+
+- 물론 interface를 사용하면 하나 이상의 인터페이스를 동시에 상속할 수도 있다.
+
+```js
+interface User{
+  firstName: string,
+  lastName: string,
+  sayHi(name:string):string
+  fullName():string
+}
+interface Human{
+  health: number
+}
+class Player implements User,Human{ //✨두가지 class를 상속하는 기적
+  constructor(
+    public firstName : string,
+    public lastName: string,
+    public health: number
+  ){}
+  fullName() {
+    return `${this.firstName} ${this.lastName}`;
+    }
+  sayHi(name:string) {
+    return `Hello ${name}. My hame is ${this.fullName()}`;
+  }
+}
+
+//물론 interface는 type으로도 지정할 수 있어 편리한 점도 잊지말자
+function makeUser(user:User): User{
+  return {
+    firstName:"nico",
+    lastName:"las",
+    fullName: () => "xx",
+    sayHi: (name) => "string"
+  }
+}
+
+makeUser({
+  firstName:"nico",
+  lastName:"las",
+  fullName: () => "xx",
+  sayHi: (name) => "string"
+})
+
+```
+
+- 마지막으로 type과 interface 복습해본다.
+
+```js
+//1️⃣ TYPE
+type PlayerA = {
+  name: string,
+};
+const playerA: PlayerA = {
+  name: 'nico',
+};
+//type에서 상속받기
+type PlayerAA = PlayerA & {
+  lastName: string,
+};
+// type PlayerAA = {
+//   //⛔️불가능
+//   health: number,
+// };
+const playerAA: PlayerAA = {
+  name: 'nico',
+  lastName: 'xxx',
+};
+
+//2️⃣ INTERFACE
+interface PlayerB {
+  name: string;
+}
+const playerB: PlayerB = {
+  name: 'nico',
+};
+interface PlayerBB extends PlayerB {
+  lastName: string;
+}
+interface PlayerBB {
+  //✅가능: interface는 property를 축적할 수 있다.
+  health: number;
+}
+const playerBB: PlayerBB = {
+  name: 'nico',
+  lastName: 'xxx',
+  health: 10,
+};
+
+//type과 interface모두 Implements를 사용해서 class 상속가능하며, 추상 클래스를 대체할 수 있다.
+type PlayerA = {
+  firstName:string
+}
+interface PlayerB {
+  firstName:string
+}
+class UserA implements PlayerA{
+  constructor(
+    public firstName:string
+  ){}
+}
+class UserB implements PlayerB{
+  constructor(
+    public firstName:string
+  ){}
+}
+```
