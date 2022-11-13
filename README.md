@@ -673,3 +673,208 @@ function printAllNumbers(arr: Array<number>) {}
 ```js
 useState<number>()
 ```
+
+</br>
+
+### 🥐 Classes
+
+- TS는 객체 지향 프로그래밍을 하기에 아주 좋다.
+- TS로 class 를 만드는 방법을 살펴본다.
+- 기본적으로 js의 class에는 prviate이나 public의 개념이 없지만, java등에는 있다. ts는 안전성을 위해서 private과 public을 사용할 수 있게 해주지만, 당연히 컴파일링 된 js 파일에는 해당 부분은 존재하지 않게 된다.
+
+```js
+//✨TS version
+class Player {
+    constructor(
+        private firstName: string,
+        private lastName: string,
+        public nickname:string
+    ){}
+    //js에서 constructor 함수안에 선언되야 하는 this.변수 = 변수 작업이 간단해진다.
+}
+const nico = new Player("nico","las","니꼬")
+nico.firstName //⛔️컴플레인: private이기 떄문에 불평, 보호받을 수 있다.
+nico.nickname //✅통과: public이기 때문에 접근 가능
+
+//✨ JS version
+"use strict";
+class Player {
+    constructor(firstName, lastName, nickname) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.nickname = nickname;
+    }
+}
+const nico = new Player("nico", "las", "니꼬");
+nico.firstName; //js version에는 어떤 불평도 뜨지 않기 때문에 보호받지 못한다.
+nico.nickname;
+```
+
+- **추상 클래스(abstract class)** 는 다른 클래스가 상속받을 수 있는 클래스이다. 하지만 이 클래스는 직접 새로운 인스턴스를 만들 수는 없다.
+
+```js
+abstract class User{
+  constructor(
+        private firstName: string,
+        private lastName: string,
+        public nickname:string
+    ){}
+}
+
+const testUser  = new User("nico", "las", "니꼬");//⛔️컴플레인: abstract class 에서는 새로운 instance를 곧장 만들 수 없다.
+
+class Player extends User{}
+const nico = new Player("nico", "las", "니꼬");//✅통과: abstract class에서 바로 새로운 instance를 만든 것이 아니므로 ok
+
+nico.nickname //조회가능
+```
+
+- **추상클래스의 메소드** 는 말그대로 추상 클래스 안에 선언되어 있는 일반적인 메소드를 말한다.
+- **추상 메소드** 는 추상 클래스 내부의 보통 메소드와 다르다. **메소드를 클래스 안에서 구현하지 않으며 call siganature만!! 작성한다.**
+- 추상 메소드는 추상 클래스를 상속받는 모든 것들이 구현을 해야하는 메소드를 의미한다.구현은 어떻게 하든 상관없지만 꼭 하긴 해야한다.
+
+```js
+//🤍🤍🤍abstract class 내부의 메소드 사용해보기
+abstract class User{
+  constructor(
+        private firstName: string,
+        private lastName: string,
+        public nickname:string
+    ){}
+    getFullName(){
+      return `${this.firstName} ${this.lastName}`
+    }
+    // private getFullName(){
+    //   return `${this.firstName} ${this.lastName}`
+    // }
+}
+
+class Player extends User{}
+const nico = new Player("nico", "las", "니꼬");
+nico.getFullName() //사용가능
+//만약 메소드를 private으로 바꾼다면 사용이 불가능하다.
+
+
+//🖤🖤🖤 abstract method를 만들어 사용해보기(with private property)
+abstract class User{
+  constructor(
+        private firstName: string,
+        private lastName: string,
+        private nickname:string
+    ){}
+    abstract getNickName():void //getNickName은 추상 메소드라 call signature만 갖는다.
+    getFullName(){
+      return `${this.firstName} ${this.lastName}`
+    }
+}
+
+//class Player extends User{}//⛔️컴플레인: abstarct method 를 수현하지 않았다고 불평
+class Player extends User{
+  getNickName(){
+    console.log(this.nickname) //⛔️컴플레인: private property로 만든다면 그 클래스를 상속했을지라도 접근할 수 없다.
+    //📌private property는 인스턴스는 물론, 자식 클래스에서조차 접근할 수 없는 property이다. 자식에서 접근하고 싶다면 private이 아니라 protected를 써야 한다.
+  }
+}
+const nico = new Player("nico", "las", "니꼬");
+nico.getFullName()
+
+
+//💜💜💜 abstract method를 만들어 사용해보기(with protected property)
+/*
+outside로 부턴 보호되지만, 자식 클래스에선 사용되기를 원한다면
+private이 아닌, protected를 사용한다.
+*/
+abstract class User{
+  constructor(
+        protected firstName: string,
+        protected lastName: string,
+        protected nickname:string
+    ){}
+    abstract getNickName():void
+    getFullName(){
+      return `${this.firstName} ${this.lastName}`
+    }
+}
+
+class Player extends User{
+  getNickName(){
+    console.log(this.nickname)
+    //✅통과: private이 아니라 protected property이기 때문에 자식클래스에서 this.nickname에 접근할 수 있다.
+  }
+}
+const nico = new Player("nico", "las", "니꼬");
+nico.getFullName()//✅통과
+nico.nickname//⛔️컴플레인: protected property라도 인스턴스에선 접근 불가
+```
+
+- 위에서 각 변수 속성(private,public,protected)에 따라 **접근 가능한 위치**를 정리하자면 아래와 같다.
+
+|   구분    | 선언한 클래스 내 | 상속받은 클래스 내 | 인스턴스 |
+| :-------: | :--------------: | :----------------: | :------: |
+|  private  |        ⭕        |         ❌         |    ❌    |
+| protected |        ⭕        |         ⭕         |    ❌    |
+|  public   |        ⭕        |         ⭕         |    ⭕    |
+
+</br>
+
+### 🥐 Classes 실전 연습 - 사전 만들기
+
+```js
+type Words = {
+  [key:string]: string
+  //📌Words라는 타입이 string만을 property로 가지는 오브젝트라고 정해주기.
+  //value가 아니라 key에 타입을 정해주는 문법이다.
+  //여기서 [whatever:string]처럼 아무 이름으로나 지정가능하다.
+}
+
+//아래는 key값의 타입을 정해주는 경우를 확인차 작성한 코드
+let dict:Words = {
+  "potato":"food",
+  Number(1) :"number" //⛔️컴플레인: key 값은 넘버일 수 없다.
+}
+
+//💩 일케 하면 안된다.
+class Dict {
+  private words :Words //⛔️컴플레인
+  /*
+  words는 initializer가 없고 contructor에서 정의된
+  sign이 아니기 때문에 컴플레인 발생
+  */
+}
+
+//💩 그렇다고 이렇게하면 contructor가 words를 지정해줘 버린다.
+class Dict {
+  constructor(
+    private words: Words
+  ){}
+}
+
+// ✨일케 해야한다.
+class Dict {
+  private words :Words //📌클래스 내부 변수에 외부 타입을 가져다 붙이고 있고,
+  constructor(){//📌바로 contructor로 초기화하는 것이 아니라 수동으로 초기화 시켰다.
+    this.words = {}
+  }
+  add(word:Word){ //📌📌class를 타입처럼 사용했다. //사전에 추가하기
+    if(this.words[word.term] === undefined){ //사전에 정의되어 있지않다면
+      this.words[word.term] = word.def; //새로 적는다.
+    }
+  }
+  def(term:string){ //사전 찾아보기
+    return this.words[term]
+  }
+}
+
+class Word {
+  constructor(
+    public term:string,
+    public def:string,
+  ){}
+}
+
+const kimchi = new Word("kimchi", "한국의 음식");
+const dict = new Dict();
+dict.add(kimchi);
+dict.def("kimchi") //한국의 음식 출력
+
+```
