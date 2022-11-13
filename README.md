@@ -1243,3 +1243,34 @@ class UserB implements PlayerB{
   ){}
 }
 ```
+
+- 아래는 가상으로 local storage를 구현해본 코드이다.generic과 polymolphism, class, interfaace를 합쳐서 sexy한 코드를 만들 수 있다. [링크](https://www.typescriptlang.org/play?#code/JYOwLgpgTgZghgYwgAgMqrAeynA5hAHgBUA+ZAb2QHoqNs8JAfdsAOa5QF3HAP7uUAJBwDtHAcFuQApVIA1x5IE+xwCVDgAsXANZ2AByeQBBAAoBJQD6dyQCDjgHVXkgD3HADIuAM5bZTAADXJALhOAa8cAaq4AY65IBlWwBzdgBdH2gEM7AIuNodDj4gDodyICoE4AWqwBQyMgA2gDWEACeAFwAzmBQoLgAushpyETUVADMgPB-gMcERmYWnoA4g8gA4hAg0MAIAYA1A4CVY3qAJ00AdNEAvtHRCAA2cBkZyAAymAhwU0EMxGSUNACM1S1tHV3IgC4LgBntUmGALz2ALQ3MscgADjkAbnCQyFn0+EXoWMGEUjIAC8FFGpQATNUAMIzObWUCQWCICBhfDtHLHW73OIZCBgAAUyXSWRyIFwABpkG8pgBXCBpIgASnIDziYAAFsAMkMvgCkqkCqCafSANwPcZxKAQAC2mBeECJqUy2VyLLZyAAJhApviUJzubz-gwBSk8hKHvhCcSVWTcEzGRQNdKwLSoCBkAaeXyTcTzXFJchphA4FACeq4uyud7jfgQWCLeNJpgQFlPqryes46D2gB3RbLVZZwik3IkcPRUuZ2MQIZWgkAImSYAbTMrGdwxd5+MbHJ1U0wDYpDY5mHzoZQKUwtNbydTYGQACNMJhdXAQMX43mCys1jWCMvVyGQOW24e1xua3Wew2AB732fn49dvGEu8PinZelMoA)
+- generic이 하위로 전달되는 것을 볼 수도 있다.
+
+```js
+interface SStorage<T> { //Storage라고 이미 선언된 JS의 웹스토리지 API를 위한 인터페이스가 존재하기 때문에 이름을 SStorage로 정함
+  [key:string] : T //3️⃣ 인터페이스에서 Generic을 사용한다.
+}
+
+class LocalStorage<T> { //1️⃣ Generic을 클래스로 보내고
+  private storage: SStorage<T> = {} //2️⃣Class가 interface로 generic을 보내고
+  set(key:string, value:T){
+    this.storage[key] = value;
+  }
+  remove(key:string){
+    delete this.storage[key]
+  }
+  get(key:string):T {
+    return this.storage[key]
+  }
+  clear(){
+    this.storage = {}
+  }
+}
+
+const stringStorage = new LocalStorage<string>()
+stringStorage.get("ket")
+stringStorage.set("hello",)
+const booleanStorage = new LocalStorage<boolean>()
+booleanStorage.get("xxx")
+```
